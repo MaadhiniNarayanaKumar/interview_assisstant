@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     assemblyai_api_key: str = ""
     gemini_model: str = "gemini-flash-latest"
-    cors_origins: str = "http://localhost:4200,http://localhost:8080"
+    cors_origins: str = "http://localhost:3000,http://localhost:4200,http://localhost:8080"
 
     model_config = SettingsConfigDict(
         env_file=ROOT_DIR / ".env",

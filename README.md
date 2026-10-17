@@ -10,6 +10,7 @@ The model is Gemini (`GEMINI_API_KEY`). Speech-to-text is AssemblyAI (`ASSEMBLYA
 backend/app/        FastAPI app
   routers/          /self-intro and /chat
   services/         Gemini, AssemblyAI, in-memory chat sessions
+ui/                 Next.js page for upload, recording, and feedback
 content/            Sample audio clips
 ```
 
@@ -27,6 +28,16 @@ source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
+
+In another terminal:
+
+```bash
+cd ui
+npm install
+npm run dev
+```
+
+Open http://localhost:3000. Upload an audio file or record one, then analyze it. The page calls `POST /self-intro` on the API.
 
 ## API
 
