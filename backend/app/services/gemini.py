@@ -56,7 +56,7 @@ class GeminiCoach:
         for attempt in range(3):
             try:
                 response = self._client_or_raise().models.generate_content(
-                    model=self.settings.gemini_model,
+                    model=self.settings.resolved_gemini_model,
                     contents=contents,
                     config=types.GenerateContentConfig(
                         system_instruction=system,

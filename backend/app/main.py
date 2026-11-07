@@ -28,5 +28,6 @@ def health() -> dict:
         "status": "ok",
         "gemini_configured": bool(current.gemini_api_key),
         "assemblyai_configured": bool(current.assemblyai_api_key),
-        "model": current.gemini_model,
+        "model": current.resolved_gemini_model,
+        "configured_model": current.gemini_model,
     }
