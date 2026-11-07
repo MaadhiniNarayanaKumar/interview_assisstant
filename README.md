@@ -281,9 +281,16 @@ The UI and API are deployed separately. **Do not put the FastAPI backend on Verc
 
 1. Go to [railway.app](https://railway.app) and sign in with GitHub
 2. **New Project** → **Deploy from GitHub repo** → `interview_assisstant`
-3. Add a service from that repo, then open **Settings**:
-   - **Root Directory:** `backend`
-   - Railway will use `backend/Dockerfile` automatically
+3. Open the service → **Settings** and use these values:
+
+| Setting | Value |
+| --- | --- |
+| Root Directory | leave **empty** (repo root) |
+| Builder | **Dockerfile** (not Railpack) |
+| Dockerfile path | `backend/Dockerfile` |
+
+The repo-root `railway.toml` already points at that Dockerfile. If the build still says “Railpack failed”, switch the builder to Dockerfile manually and redeploy.
+
 4. Open **Variables** and set:
 
 | Variable | Value |
@@ -306,13 +313,17 @@ You should see `"gemini_configured": true` and `"assemblyai_configured": true`.
 
 1. Go to [vercel.com](https://vercel.com) → **Add New Project** → import `interview_assisstant`
 2. Use branch **`main`**
-3. Set:
+3. Click **Edit** next to Root Directory and set:
 
 | Setting | Value |
 | --- | --- |
 | Root Directory | `ui` |
 | Framework Preset | Next.js |
+| Build Command | `next build` (default) |
+| Install Command | `npm install` (default) |
 | Env `NEXT_PUBLIC_API_URL` | `https://YOUR-RAILWAY-DOMAIN` (no trailing slash) |
+
+If Root Directory is left as `.` / empty, Vercel builds the monorepo root and fails. It must be `ui`.
 
 4. Deploy, then open the Vercel URL and run an upload/analyze test
 

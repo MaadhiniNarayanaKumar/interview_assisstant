@@ -1,6 +1,9 @@
+# Prefer the repo-root /railway.toml.
+# If you set Config-as-code to /backend/railway.toml, keep Root Directory empty
+# so the Docker build context is still the repository root.
 [build]
 builder = "DOCKERFILE"
-dockerfilePath = "Dockerfile"
+dockerfilePath = "backend/Dockerfile"
 
 [deploy]
 startCommand = "sh -c 'uvicorn app.main:app --host 0.0.0.0 --port $PORT'"

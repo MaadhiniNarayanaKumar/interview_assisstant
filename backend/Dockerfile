@@ -1,3 +1,4 @@
+# Build context must be the repository root (see /railway.toml).
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -5,10 +6,10 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app ./app
+COPY backend/app ./app
 
 EXPOSE 8000
 
