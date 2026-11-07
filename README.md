@@ -266,24 +266,71 @@ These cover health, validation, missing-key responses, and session history. They
 
 ---
 
-## Deployment overview
+## Deployment
 
-The UI and API are deployed separately.
+The UI and API are deployed separately. **Do not put the FastAPI backend on Vercel.**
 
-| Piece | Suggested host | Notes |
+| Piece | Host | Config in repo |
 | --- | --- | --- |
-| `ui/` | **Vercel** | Set Root Directory to `ui`. Set `NEXT_PUBLIC_API_URL` to your API URL. |
-| `backend/` | Railway / Render / Fly.io | Start with `uvicorn app.main:app --host 0.0.0.0 --port $PORT`. Set the same secrets as local `.env`. |
+| `ui/` | **Vercel** | `ui/vercel.json` |
+| `backend/` | **Railway** | `backend/Dockerfile`, `backend/railway.toml` |
+
+`*.vercel.app` origins are already allowed by the API. Add custom domains via `CORS_ORIGINS`.
+
+### 1. Deploy the backend on Railway
+
+1. Go to [railway.app](https://railway.app) and sign in with GitHub
+2. **New Project** → **Deploy from GitHub repo** → `interview_assisstant`
+3. Add a service from that repo, then open **Settings**:
+   - **Root Directory:** `backend`
+   - Railway will use `backend/Dockerfile` automatically
+4. Open **Variables** and set:
+
+| Variable | Value |
+| --- | --- |
+| `GEMINI_API_KEY` | your Gemini key |
+| `ASSEMBLYAI_API_KEY` | your AssemblyAI key |
+| `GEMINI_MODEL` | `gemini-flash-latest` (optional) |
+| `CORS_ORIGINS` | `https://your-app.vercel.app` plus any custom domain |
+
+5. Under **Settings → Networking**, click **Generate Domain**
+6. Confirm the API is live:
+
+```bash
+curl https://YOUR-RAILWAY-DOMAIN/health
+```
+
+You should see `"gemini_configured": true` and `"assemblyai_configured": true`.
+
+### 2. Deploy the UI on Vercel
+
+1. Go to [vercel.com](https://vercel.com) → **Add New Project** → import `interview_assisstant`
+2. Use branch **`main`**
+3. Set:
+
+| Setting | Value |
+| --- | --- |
+| Root Directory | `ui` |
+| Framework Preset | Next.js |
+| Env `NEXT_PUBLIC_API_URL` | `https://YOUR-RAILWAY-DOMAIN` (no trailing slash) |
+
+4. Deploy, then open the Vercel URL and run an upload/analyze test
+
+### 3. Custom domain (optional)
+
+1. In Vercel → Project → **Domains**, add `yourdomain.com`
+2. In Railway → service → **Networking**, add `api.yourdomain.com`
+3. Update DNS as each host instructs
+4. Set backend `CORS_ORIGINS` to include `https://yourdomain.com`
+5. Set Vercel `NEXT_PUBLIC_API_URL` to `https://api.yourdomain.com` and redeploy
 
 ### Production checklist
 
-1. Deploy the API and confirm `/health` returns both keys configured
-2. Set `CORS_ORIGINS` to your live site, e.g. `https://yourdomain.com,https://www.yourdomain.com`
-3. Deploy the UI on Vercel with `NEXT_PUBLIC_API_URL=https://api.yourdomain.com`
-4. Attach custom domains:
-   - Apex / `www` → Vercel
-   - `api` subdomain → backend host
-5. Rotate any keys that were ever committed or pasted into chat
+1. Railway `/health` shows both keys configured
+2. Vercel has `NEXT_PUBLIC_API_URL` pointing at Railway
+3. Analyze works from the live site
+4. Custom domains (if any) are on both hosts and in `CORS_ORIGINS`
+5. Real keys exist only in Railway/Vercel env settings — never in git
 
 ---
 
