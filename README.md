@@ -98,7 +98,7 @@ cp .env.example .env
 | --- | --- | --- |
 | `GEMINI_API_KEY` | Yes | Google Gemini API key |
 | `ASSEMBLYAI_API_KEY` | Yes | AssemblyAI API key |
-| `GEMINI_MODEL` | No | Defaults to `gemini-3-flash-preview` |
+| `GEMINI_MODEL` | No | Defaults to `gemini-3.8-flash` |
 | `CORS_ORIGINS` | No | Comma-separated allowed origins. Default includes `http://localhost:3000` |
 
 For the UI in production, set:
@@ -138,7 +138,7 @@ Example response:
   "status": "ok",
   "gemini_configured": true,
   "assemblyai_configured": true,
-  "model": "gemini-3-flash-preview"
+  "model": "gemini-3.8-flash"
 }
 ```
 
@@ -297,7 +297,7 @@ The repo-root `railway.toml` already points at that Dockerfile. If the build sti
 | --- | --- |
 | `GEMINI_API_KEY` | your Gemini key |
 | `ASSEMBLYAI_API_KEY` | your AssemblyAI key |
-| `GEMINI_MODEL` | `gemini-3-flash-preview` (optional) |
+| `GEMINI_MODEL` | `gemini-3.8-flash` (optional) |
 | `CORS_ORIGINS` | `https://your-app.vercel.app` plus any custom domain |
 
 5. Under **Settings → Networking**, click **Generate Domain**

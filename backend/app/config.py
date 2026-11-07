@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
-DEFAULT_GEMINI_MODEL = "gemini-3-flash-preview"
+DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 
 # Railway/UI may still have retired aliases set in GEMINI_MODEL.
 RETIRED_GEMINI_MODELS = {
@@ -16,6 +16,8 @@ RETIRED_GEMINI_MODELS = {
     "gemini-2.5-flash-lite",
     "gemini-1.5-flash",
     "gemini-1.5-pro",
+    # Preview alias fails when the client hits API v1 instead of v1beta.
+    "gemini-3-flash-preview",
 }
 
 

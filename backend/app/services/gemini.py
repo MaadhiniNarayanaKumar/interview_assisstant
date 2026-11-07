@@ -34,7 +34,11 @@ class GeminiCoach:
         if not self.settings.gemini_api_key:
             raise MissingAPIKey("GEMINI_API_KEY")
         if self._client is None:
-            self._client = genai.Client(api_key=self.settings.gemini_api_key.strip())
+            # Preview/current Gemini models require v1beta; v1 returns 404 NOT_FOUND.
+            self._client = genai.Client(
+                api_key=self.settings.gemini_api_key.strip(),
+                http_options=types.HttpOptions(api_version="v1beta"),
+            )
         return self._client
 
     def _parse(self, response, schema: Type[T]) -> T:
