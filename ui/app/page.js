@@ -237,7 +237,7 @@ export default function HomePage() {
       const unreachable = err.message === "Failed to fetch";
       setError(
         unreachable
-          ? "Could not reach the analysis service. Start the API on port 8000 and try again."
+          ? `Could not reach the analysis service at ${API_URL}. Check that the API is up and allows this site in CORS.`
           : err.message || "The analysis could not be completed.",
       );
     } finally {
