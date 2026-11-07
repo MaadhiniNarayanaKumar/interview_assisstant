@@ -1,4 +1,5 @@
 import logging
+import time
 from typing import Dict, List, Optional, Type, TypeVar
 
 from google import genai
@@ -14,6 +15,15 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar("T", bound=BaseModel)
 
+RETRYABLE_MARKERS = (
+    "UNAVAILABLE",
+    "high demand",
+    "try again later",
+    "503",
+    "429",
+    "RESOURCE_EXHAUSTED",
+)
+
 
 class GeminiCoach:
     def __init__(self, settings: Settings) -> None:
@@ -24,26 +34,10 @@ class GeminiCoach:
         if not self.settings.gemini_api_key:
             raise MissingAPIKey("GEMINI_API_KEY")
         if self._client is None:
-            self._client = genai.Client(api_key=self.settings.gemini_api_key)
+            self._client = genai.Client(api_key=self.settings.gemini_api_key.strip())
         return self._client
 
-    def _generate(self, *, system: str, contents: str, schema: Type[T]) -> T:
-        try:
-            response = self._client_or_raise().models.generate_content(
-                model=self.settings.gemini_model,
-                contents=contents,
-                config=types.GenerateContentConfig(
-                    system_instruction=system,
-                    response_mime_type="application/json",
-                    response_schema=schema,
-                ),
-            )
-        except MissingAPIKey:
-            raise
-        except Exception as exc:
-            logger.exception("Gemini request failed")
-            raise ModelError("Gemini could not complete the request") from exc
-
+    def _parse(self, response, schema: Type[T]) -> T:
         parsed = response.parsed
         try:
             if isinstance(parsed, schema):
@@ -55,8 +49,35 @@ class GeminiCoach:
         except ValidationError as exc:
             logger.exception("Gemini returned an unexpected payload")
             raise ModelError("Gemini returned an unexpected payload") from exc
-
         raise ModelError("Gemini returned an empty response")
+
+    def _generate(self, *, system: str, contents: str, schema: Type[T]) -> T:
+        last_error = "unknown error"
+        for attempt in range(3):
+            try:
+                response = self._client_or_raise().models.generate_content(
+                    model=self.settings.gemini_model,
+                    contents=contents,
+                    config=types.GenerateContentConfig(
+                        system_instruction=system,
+                        response_mime_type="application/json",
+                        response_schema=schema,
+                    ),
+                )
+                return self._parse(response, schema)
+            except MissingAPIKey:
+                raise
+            except ModelError:
+                raise
+            except Exception as exc:
+                last_error = str(exc)
+                logger.exception("Gemini request failed (attempt %s)", attempt + 1)
+                if not any(marker.lower() in last_error.lower() for marker in RETRYABLE_MARKERS):
+                    break
+                time.sleep(1.5 * (attempt + 1))
+
+        detail = last_error.strip().splitlines()[0][:240]
+        raise ModelError(f"Gemini could not complete the request: {detail}")
 
     def review_intro(self, transcript: str) -> IntroFeedback:
         return self._generate(
